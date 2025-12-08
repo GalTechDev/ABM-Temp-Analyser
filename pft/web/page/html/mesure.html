@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mesure</title>
+    <link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.1/dist/flowbite.min.css" rel="stylesheet" />
+    <link href="/css/graph.css" rel="stylesheet">
+
+    <script src="https://kit.fontawesome.com/3ba6df0ead.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.1/dist/flowbite.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
+    <script src="https://cdn.jsdelivr.net/npm/simple-datatables@9.0.3"></script>
+    <script src="/js/chartjs-plugin-zoom.min.js"></script>
+
+    <script src="/js/core.js"></script>
+    <script src="/js/data.js"></script>
+    <script src="/js/graph.js"></script>
+    <script src="/js/mesure.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/3.0.1/jspdf.umd.min.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/print-js/1.6.0/print.js"></script>
+    <script src="/js/genPDF.js"></script>
+  </head>
+
+  <body class="dark:bg-gray-800">
+
+    <!--navbar-->
+    {% include "part/navbar.html" %}
+    <!--end-navbar-->
+    
+    {% for page in list_data_type %}
+        {% include "part/chart.html" %}
+    {% endfor %}
+
+    <!--footer-->
+    {% include "part/footer.html" %}
+    <!--end-footer-->
+
+  </body>
+
+</html>

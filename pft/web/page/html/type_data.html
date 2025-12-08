@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analyse</title>
+    <link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.1/dist/flowbite.min.css" rel="stylesheet" />
+    <link href="/css/graph.css" rel="stylesheet">
+
+    <script src="https://kit.fontawesome.com/3ba6df0ead.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.1/dist/flowbite.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1"></script>
+    <script src="https://cdn.jsdelivr.net/npm/simple-datatables@9.0.3"></script>
+
+    <script src="/js/core.js"></script>
+    <script src="/js/data.js"></script>
+    <script src="/js/graph.js"></script>
+    <script src="/js/type_data.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="/js/genPDF.js"></script>
+  </head>
+
+  <body class="dark:bg-gray-800">
+
+    <!--navbar-->
+    {% include "part/navbar.html" %}
+    <!--end-navbar-->   
+
+    <!-- drawer init and toggle -->
+    <div class="flex items-center mt-10">
+      <button data-drawer-target="logo-sidebar" data-drawer-toggle="logo-sidebar" aria-controls="logo-sidebar" type="button" class="mt-8 inline-flex items-center p-2 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600">
+          <svg class="w-6 h-6" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+             <path clip-rule="evenodd" fill-rule="evenodd" d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"></path>
+          </svg>
+       </button>
+    </div>
+    <aside id="logo-sidebar" class="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700" aria-label="Sidebar">
+      <div class="h-full px-3 py-4 overflow-y-auto bg-gray-50 dark:bg-gray-800">
+        <ul class="space-y-2 font-medium">
+          <li>
+            <button type="button" class="flex items-center w-full p-2 text-base text-gray-900 transition duration-75 rounded-lg group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700" aria-controls="dropdown-mesures" data-collapse-toggle="dropdown-mesures">
+              <i class="fa-solid fa-flask"></i>
+              <span class="flex-1 ms-3 text-left rtl:text-right whitespace-nowrap">Mesures</span>
+              <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
+              </svg>
+            </button>
+            <ul id="dropdown-mesures" class="hidden py-2 space-y-2">
+              {% for mesure in mesures %}
+              <li>
+                <ul class="space-y-2 font-medium p-2">
+                  <li>
+                    <button type="button" class="flex items-center w-full p-2 text-base text-gray-900 transition duration-75 rounded-lg group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700" aria-controls="dropdown-{{mesure}}" data-collapse-toggle="dropdown-{{mesure}}">
+                      <i class="fa-solid fa-flask"></i>
+                      <span class="flex-1 ms-3 text-left rtl:text-right whitespace-nowrap">{{mesure}}</span>
+                      <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
+                      </svg>
+                    </button>
+                    <ul id="dropdown-{{mesure}}" class="hidden py-2 space-y-2">
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+              {% endfor %}
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </aside>
+    
+    <div class="p-4 sm:ml-64">
+      <!--chart-->
+      {% include "part/chart.html" %}
+      <!--end-chart-->
+      <!--footer-->
+      {% include "part/footer.html" %}
+      <!--end-footer-->
+    </div>
+
+    
+
+  </body>
+
+</html>

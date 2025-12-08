@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="ABM-Temp-Analyser - Chaîne de mesure complète pour analyser des courbes de température avec glace carbonique">
+    <title>ABM-Temp-Analyser | Analyse de Température</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-container">
+            <a href="#" class="nav-logo">ABM-Temp-Analyser</a>
+            <ul class="nav-links">
+                <li><a href="#contexte">Contexte</a></li>
+                <li><a href="#architecture">Architecture</a></li>
+                <li><a href="#capteur">Capteur</a></li>
+                <li><a href="#protocole">Protocole</a></li>
+                <li><a href="#analyse">Analyse</a></li>
+                <li><a href="#simulateur">Simulateur</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+        <div class="hero-content">
+            <span class="hero-badge">🧊 Projet de Fin d'Études — TSI Météo-France</span>
+            <h1>
+                <span class="gradient-text">ABM-Temp-Analyser</span>
+            </h1>
+            <p class="hero-subtitle">
+                Une chaîne de mesure complète pour analyser des courbes de température
+                et modéliser le comportement thermique de colis avec glace carbonique.
+            </p>
+
+            <div class="temp-display">
+                <span class="temp-value" id="hero-temp">-77</span>
+                <span class="temp-unit">°C</span>
+            </div>
+
+            <div class="hero-buttons">
+                <a href="#simulateur" class="btn btn-primary">
+                    🎛️ Essayer le simulateur
+                </a>
+                <a href="#contexte" class="btn btn-secondary">
+                    📖 Découvrir le projet
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contexte Section -->
+    <section class="section" id="contexte">
+        <div class="container">
+            <div class="section-header">
+                <span class="badge">Stage de Fin d'Études</span>
+                <h2>Le Contexte du Projet</h2>
+                <p>Stage réalisé chez ABM (Applied Biological Materials) — Juin-Juillet 2025</p>
+            </div>
+
+            <div class="grid-2">
+                <div>
+                    <div class="card" style="margin-bottom: var(--space-lg);">
+                        <h3 class="card-title">🏢 L'Entreprise</h3>
+                        <p><strong>ABM (Applied Biological Materials)</strong> est une entreprise spécialisée dans la
+                            biotechnologie. Elle fournit des réactifs, des lignées cellulaires et des services de génie
+                            génétique destinés à la recherche biomédicale et moléculaire.</p>
+                        <p style="margin-top: var(--space-md);">Ce stage a été réalisé au sein de leur
+                            <strong>plateforme logistique Européenne</strong>, sous la direction de Jayzonn Allion.
+                        </p>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="card-title">🎯 La Problématique</h3>
+                        <p
+                            style="font-style: italic; color: var(--cold-primary); border-left: 3px solid var(--cold-primary); padding-left: var(--space-md); margin: var(--space-md) 0;">
+                            Comment concevoir et mettre en œuvre une chaîne d'acquisition de mesure de température
+                            robuste et fiable, capable de caractériser précisément l'évolution thermique à l'intérieur
+                            d'un colis refroidi à la glace carbonique, et d'en visualiser les données en temps réel ?
+                        </p>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="card" style="height: 100%;">
+                        <h3 class="card-title">❄️ Les Enjeux de la Chaîne du Froid</h3>
+                        <p>Dans le transport de produits sensibles (pharmaceutiques, biologiques, alimentaires), le
+                            maintien d'une température spécifique est <strong>critique</strong> pour garantir leur
+                            intégrité et leur efficacité.</p>
+
+                        <div style="margin-top: var(--space-lg);">
+                            <div
+                                style="display: flex; align-items: center; gap: var(--space-md); margin-bottom: var(--space-md); padding: var(--space-md); background: rgba(255, 107, 53, 0.1); border-radius: var(--border-radius-md);">
+                                <span style="font-size: 1.5rem;">⚠️</span>
+                                <div>
+                                    <strong style="color: var(--hot-primary);">Risques d'une rupture thermique</strong>
+                                    <p style="margin: 0; font-size: 0.9rem;">Pertes économiques, risques sanitaires,
+                                        dégradation irréversible</p>
+                                </div>
+                            </div>
+
+                            <div
+                                style="display: flex; align-items: center; gap: var(--space-md); margin-bottom: var(--space-md); padding: var(--space-md); background: rgba(0, 212, 255, 0.1); border-radius: var(--border-radius-md);">
+                                <span style="font-size: 1.5rem;">🧊</span>
+                                <div>
+                                    <strong style="color: var(--cold-primary);">Glace carbonique</strong>
+                                    <p style="margin: 0; font-size: 0.9rem;">Sublimation à −78,5°C, gradients thermiques
+                                        complexes</p>
+                                </div>
+                            </div>
+
+                            <div
+                                style="display: flex; align-items: center; gap: var(--space-md); padding: var(--space-md); background: rgba(16, 185, 129, 0.1); border-radius: var(--border-radius-md);">
+                                <span style="font-size: 1.5rem;">📊</span>
+                                <div>
+                                    <strong style="color: var(--accent-green);">Besoin de traçabilité</strong>
+                                    <p style="margin: 0; font-size: 0.9rem;">Valider la conformité et optimiser les
+                                        emballages isothermes</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: var(--space-xl); text-align: center;">
+                <p style="font-size: 1.1rem; margin: 0;">
+                    <strong>Maxence MOREAU</strong> — Technicien Supérieur Instruments et Installations (TSI)<br>
+                    <span style="color: var(--text-muted);">Promotion 2023/2025 — Météo-France / ENM</span>
+                </p>
+                <div style="margin-top: var(--space-lg);">
+                    <a href="assets/Rapport Maxence Moreau PFE.pdf" download class="btn btn-primary"
+                        style="gap: var(--space-sm);">
+                        📄 Télécharger le rapport complet (PDF)
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Architecture Section -->
+    <section class="architecture" id="architecture">
+        <div class="container">
+            <div class="section-header">
+                <span class="badge">Vue d'ensemble</span>
+                <h2>Architecture du Système</h2>
+                <p>Un système complet de collecte et d'analyse de données de température</p>
+            </div>
+
+            <div class="architecture-diagram" style="flex-direction: column; gap: var(--space-xl);">
+                <!-- Groupe Hardware - Sur site -->
+                <div
+                    style="background: rgba(0, 212, 255, 0.05); border: 1px dashed rgba(0, 212, 255, 0.3); border-radius: var(--border-radius-xl); padding: var(--space-xl); position: relative;">
+                    <div
+                        style="position: absolute; top: -12px; left: 20px; background: var(--bg-secondary); padding: 0 var(--space-md); color: var(--cold-primary); font-weight: 600; font-size: 0.85rem;">
+                        🏭 HARDWARE — Sur site (Colis)
+                    </div>
+                    <div
+                        style="display: flex; align-items: center; justify-content: center; gap: var(--space-lg); flex-wrap: wrap;">
+                        <div class="arch-node" data-step="1">
+                            <div class="arch-node-icon">🌡️</div>
+                            <div class="arch-node-title">Capteur PT100</div>
+                            <div class="arch-node-desc">Sonde de température<br>-200°C à +850°C</div>
+                        </div>
+
+                        <div class="arch-arrow">→</div>
+
+                        <div class="arch-node" data-step="2">
+                            <div class="arch-node-icon">📟</div>
+                            <div class="arch-node-title">MAX31865</div>
+                            <div class="arch-node-desc">Convertisseur RTD<br>Haute précision</div>
+                        </div>
+
+                        <div class="arch-arrow">→</div>
+
+                        <div class="arch-node" data-step="3">
+                            <div class="arch-node-icon">🔌</div>
+                            <div class="arch-node-title">ESP32</div>
+                            <div class="arch-node-desc">Microcontrôleur<br>WiFi intégré</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Flèche WiFi -->
+                <div style="display: flex; align-items: center; justify-content: center; gap: var(--space-md);">
+                    <div style="font-size: 1.5rem; color: var(--hot-primary);">📡</div>
+                    <div style="display: flex; flex-direction: column; align-items: center;">
+                        <div style="font-size: 1.5rem; color: var(--cold-primary);">↓</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">WiFi / Internet</div>
+                    </div>
+                </div>
+
+                <!-- Groupe Serveurs - À distance -->
+                <div
+                    style="background: rgba(139, 92, 246, 0.05); border: 1px dashed rgba(139, 92, 246, 0.3); border-radius: var(--border-radius-xl); padding: var(--space-xl); position: relative;">
+                    <div
+                        style="position: absolute; top: -12px; left: 20px; background: var(--bg-secondary); padding: 0 var(--space-md); color: var(--accent-purple); font-weight: 600; font-size: 0.85rem;">
+                        ☁️ SERVEURS — Infrastructure distante
+                    </div>
+                    <div
+                        style="display: flex; align-items: center; justify-content: center; gap: var(--space-lg); flex-wrap: wrap;">
+                        <div class="arch-node" data-step="4" style="border-color: rgba(139, 92, 246, 0.5);">
+                            <div class="arch-node-icon">📥</div>
+                            <div class="arch-node-title">PFC</div>
+                            <div class="arch-node-desc">Plateforme de Collecte<br>Stockage des données</div>
+                        </div>
+
+                        <div class="arch-arrow">←→</div>
+
+                        <div class="arch-node" data-step="5" style="border-color: rgba(16, 185, 129, 0.5);">
+                            <div class="arch-node-icon">📊</div>
+                            <div class="arch-node-title">PFT</div>
+                            <div class="arch-node-desc">Plateforme de Traitement<br>Analyse & Visualisation</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Détails PFC/PFT -->
+            <div class="grid-2" style="margin-top: var(--space-xl);">
+                <div class="card" style="border-left: 3px solid var(--accent-purple);">
+                    <h3 class="card-title" style="color: var(--accent-purple);">📥 PFC — Plateforme de Collecte</h3>
+                    <p>Serveur de concentration des données qui reçoit les mesures des capteurs ESP32 en temps réel via
+                        API REST sécurisée (HTTPS).</p>
+                    <ul
+                        style="color: var(--text-secondary); margin-top: var(--space-md); padding-left: var(--space-lg);">
+                        <li>Réception des données via API REST</li>
+                        <li>Stockage en base de données SQLite</li>
+                        <li>Exposition des données pour la PFT</li>
+                    </ul>
+                </div>
+                <div class="card" style="border-left: 3px solid var(--accent-green);">
+                    <h3 class="card-title" style="color: var(--accent-green);">📊 PFT — Plateforme de Traitement</h3>
+                    <p>Interroge la PFC pour récupérer les données, effectue les analyses et fournit une interface de
+                        visualisation des résultats.</p>
+                    <ul
+                        style="color: var(--text-secondary); margin-top: var(--space-md); padding-left: var(--space-lg);">
+                        <li>Récupération des données depuis la PFC</li>
+                        <li>Analyse et modélisation Python</li>
+                        <li>Interface web de visualisation</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="grid-3" style="margin-top: var(--space-3xl);">
+                <div class="card">
+                    <div class="card-icon">⚡</div>
+                    <h3 class="card-title">Mesure Continue</h3>
+                    <p>Relevé de température toutes les minutes avec horodatage précis et stockage local en cas de perte
+                        de connexion.</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">🔒</div>
+                    <h3 class="card-title">Fiabilité</h3>
+                    <p>Système de file d'attente locale (LittleFS) pour garantir aucune perte de données même hors
+                        connexion.</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">📊</div>
+                    <h3 class="card-title">Analyse Avancée</h3>
+                    <p>Modélisation mathématique pour prédire la durée du plateau thermique en fonction du poids de
+                        glace carbonique.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Capteur Section -->
+    <section class="section" id="capteur">
+        <div class="container">
+            <div class="section-header">
+                <span class="badge">Hardware</span>
+                <h2>Le Capteur Embarqué</h2>
+                <p>Code Arduino annoté avec explications interactives</p>
+            </div>
+
+            <div class="grid-2">
+                <div class="code-viewer">
+                    <div class="code-header">
+                        <span class="code-dot red"></span>
+                        <span class="code-dot yellow"></span>
+                        <span class="code-dot green"></span>
+                        <span class="code-title">abm_temp_analyser.ino</span>
+                    </div>
+                    <div class="code-content">
+                        <pre><code><div class="code-line tooltip" data-tooltip="Bibliothèque Adafruit pour le convertisseur MAX31865"><span class="code-line-number">1</span><span class="keyword">#include</span> <span class="string">&lt;Adafruit_MAX31865.h&gt;</span></div><div class="code-line tooltip" data-tooltip="Stockage persistant des préférences dans la flash"><span class="code-line-number">2</span><span class="keyword">#include</span> <span class="string">&lt;Preferences.h&gt;</span></div><div class="code-line tooltip" data-tooltip="Connexion WiFi pour l'envoi des données"><span class="code-line-number">3</span><span class="keyword">#include</span> <span class="string">&lt;WiFi.h&gt;</span></div><div class="code-line"><span class="code-line-number">4</span></div><div class="code-line tooltip" data-tooltip="Configuration des pins SPI : CS=19, DI=21, DO=22, CLK=23"><span class="code-line-number">5</span><span class="type">Adafruit_MAX31865</span> <span class="function">thermo</span> = <span class="function">Adafruit_MAX31865</span>(<span class="number">19</span>, <span class="number">21</span>, <span class="number">22</span>, <span class="number">23</span>);</div><div class="code-line"><span class="code-line-number">6</span></div><div class="code-line tooltip" data-tooltip="Résistance de référence du circuit MAX31865"><span class="code-line-number">7</span><span class="keyword">#define</span> <span class="type">RREF</span>     <span class="number">430.0</span></div><div class="code-line tooltip" data-tooltip="Résistance nominale du capteur PT100 à 0°C"><span class="code-line-number">8</span><span class="keyword">#define</span> <span class="type">RNOMINAL</span> <span class="number">100.0</span></div><div class="code-line"><span class="code-line-number">9</span></div><div class="code-line tooltip" data-tooltip="Intervalle de mesure : 60 secondes"><span class="code-line-number">10</span><span class="keyword">unsigned long</span> timerDelay = <span class="number">60000</span>; <span class="comment">// 1 minute</span></div><div class="code-line"><span class="code-line-number">11</span></div><div class="code-line tooltip" data-tooltip="Lecture de la température avec conversion RTD"><span class="code-line-number">12</span><span class="type">float</span> <span class="function">readTemp</span>() {</div><div class="code-line"><span class="code-line-number">13</span>    <span class="keyword">return</span> thermo.<span class="function">temperature</span>(<span class="type">RNOMINAL</span>, <span class="type">RREF</span>);</div><div class="code-line"><span class="code-line-number">14</span>}</div></code></pre>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="card" style="margin-bottom: var(--space-lg);">
+                        <h3 class="card-title">🌡️ Capteur PT100</h3>
+                        <p>Sonde RTD (Resistance Temperature Detector) en platine. La résistance varie linéairement avec
+                            la température : 100Ω à 0°C.</p>
+                        <ul
+                            style="color: var(--text-secondary); margin-top: var(--space-md); padding-left: var(--space-lg);">
+                            <li>Plage : -200°C à +850°C</li>
+                            <li>Précision : ±0.3°C (classe A)</li>
+                            <li>Stabilité à long terme</li>
+                        </ul>
+                    </div>
+
+                    <div class="card" style="margin-bottom: var(--space-lg);">
+                        <h3 class="card-title">📟 Convertisseur MAX31865</h3>
+                        <p>Circuit intégré spécialisé pour la mesure de sondes RTD. Gère l'excitation, la conversion et
+                            la linéarisation.</p>
+                        <ul
+                            style="color: var(--text-secondary); margin-top: var(--space-md); padding-left: var(--space-lg);">
+                            <li>Interface SPI</li>
+                            <li>Détection de défauts</li>
+                            <li>Résolution 15 bits</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="card-title">🔌 ESP32</h3>
+                        <p>Microcontrôleur Espressif avec WiFi/Bluetooth intégré. Stocke les mesures localement en cas
+                            de déconnexion.</p>
+                        <ul
+                            style="color: var(--text-secondary); margin-top: var(--space-md); padding-left: var(--space-lg);">
+                            <li>WiFi 802.11 b/g/n</li>
+                            <li>LittleFS pour le stockage</li>
+                            <li>Configuration via Serial</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Protocole Section -->
+    <section class="architecture" id="protocole">
+        <div class="container">
+            <div class="section-header">
+                <span class="badge">Méthodologie</span>
+                <h2>Protocole Expérimental</h2>
+                <p>Étapes de l'expérience de mesure thermique</p>
+            </div>
+
+            <div class="grid-2">
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-time">T0</div>
+                        <div class="timeline-title">Préparation du colis</div>
+                        <div class="timeline-desc">Placement de la glace carbonique pesée (6.1kg ou 10kg) dans le
+                            conteneur isotherme avec la sonde PT100.</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-time">T0 → T1</div>
+                        <div class="timeline-title">Phase de descente</div>
+                        <div class="timeline-desc">Refroidissement rapide jusqu'à atteindre -77°C (température de
+                            sublimation de la GC).</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-time">T1 → T2</div>
+                        <div class="timeline-title">Plateau thermique</div>
+                        <div class="timeline-desc">Température stable à -77°C pendant la sublimation. Durée
+                            proportionnelle au poids initial de GC.</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-time">T2 → T3</div>
+                        <div class="timeline-title">Phase de remontée</div>
+                        <div class="timeline-desc">Réchauffement progressif après sublimation complète. Vitesse
+                            dépendante de l'isolation.</div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="curveChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Analyse Section -->
+    <section class="section" id="analyse">
+        <div class="container">
+            <div class="section-header">
+                <span class="badge">Data Science</span>
+                <h2>Analyse des Données</h2>
+                <p>Modélisation mathématique de la relation poids → durée du plateau</p>
+            </div>
+
+            <div class="grid-2">
+                <div class="card">
+                    <h3 class="card-title">📈 Modèle Linéaire</h3>
+                    <p
+                        style="font-family: var(--font-mono); color: var(--cold-primary); font-size: 1.1rem; margin: var(--space-md) 0;">
+                        Durée (min) = 374.36 × Poids (kg) - 60.51
+                    </p>
+                    <p>Ce modèle linéaire permet de prédire la durée du plateau à -77°C en fonction du poids initial de
+                        glace carbonique.</p>
+
+                    <div style="margin-top: var(--space-lg);">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-sm);">
+                            <span>Coefficient R²</span>
+                            <span style="color: var(--accent-green); font-weight: 600;">0.99</span>
+                        </div>
+                        <div
+                            style="height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
+                            <div style="width: 99%; height: 100%; background: var(--gradient-cold);"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title">🔬 Données Expérimentales</h3>
+                    <table style="width: 100%; margin-top: var(--space-md); border-collapse: collapse;">
+                        <thead>
+                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                                <th style="padding: var(--space-sm); text-align: left; color: var(--text-muted);">Mesure
+                                </th>
+                                <th style="padding: var(--space-sm); text-align: right; color: var(--text-muted);">Poids
+                                    GC</th>
+                                <th style="padding: var(--space-sm); text-align: right; color: var(--text-muted);">Durée
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="padding: var(--space-sm);">Colis 10kg GC</td>
+                                <td
+                                    style="padding: var(--space-sm); text-align: right; font-family: var(--font-mono); color: var(--cold-primary);">
+                                    10.0 kg</td>
+                                <td style="padding: var(--space-sm); text-align: right; font-family: var(--font-mono);">
+                                    61.4 h</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: var(--space-sm);">Colis 6.1kg GC</td>
+                                <td
+                                    style="padding: var(--space-sm); text-align: right; font-family: var(--font-mono); color: var(--cold-primary);">
+                                    6.1 kg</td>
+                                <td style="padding: var(--space-sm); text-align: right; font-family: var(--font-mono);">
+                                    37.0 h</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="chart-container" style="margin-top: var(--space-xl); height: 450px;">
+                <canvas id="regressionChart"></canvas>
+            </div>
+        </div>
+    </section>
+
+    <!-- Simulateur Section -->
+    <section class="simulator" id="simulateur">
+        <div class="container">
+            <div class="section-header">
+                <span class="badge">Interactif</span>
+                <h2>Simulateur de Prédiction</h2>
+                <p>Ajustez le poids de glace carbonique pour voir la durée prédite du plateau</p>
+            </div>
+
+            <div class="simulator-container">
+                <div class="simulator-controls">
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Poids de Glace Carbonique</span>
+                            <span class="control-value"><span id="weight-value">5.0</span> kg</span>
+                        </div>
+                        <input type="range" id="weight-slider" min="1" max="15" step="0.1" value="5">
+                    </div>
+
+                    <div class="result-box" style="margin-bottom: var(--space-lg);">
+                        <div class="result-label">Durée du plateau prédite</div>
+                        <div class="result-value">
+                            <span id="duration-hours">31</span><span class="result-unit"> h </span>
+                            <span id="duration-minutes">10</span><span class="result-unit"> min</span>
+                        </div>
+                    </div>
+
+                    <div class="result-box"
+                        style="background: rgba(255, 107, 53, 0.1); border-color: rgba(255, 107, 53, 0.3);">
+                        <div class="result-label">Durée totale estimée</div>
+                        <div class="result-value" style="color: var(--hot-primary);">
+                            <span id="total-hours">45</span><span class="result-unit"> h</span>
+                        </div>
+                        <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: var(--space-xs);">
+                            (plateau + remontée jusqu'à 0°C)
+                        </div>
+                    </div>
+
+                    <p style="margin-top: var(--space-lg); font-size: 0.85rem; color: var(--text-muted);">
+                        ⚠️ Ce simulateur utilise le modèle linéaire basé sur les données expérimentales.
+                        Les résultats peuvent varier selon l'isolation du conteneur.
+                    </p>
+                </div>
+
+                <div class="chart-container" style="height: 450px;">
+                    <canvas id="simulatorChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p class="footer-text">
+                ABM-Temp-Analyser — Projet de Fin d'Études par Maxence Moreau
+            </p>
+            <p class="footer-text" style="margin-top: var(--space-sm);">
+                <a href="https://github.com/GalTechDev/ABM-Temp-Analyser" target="_blank">
+                    GitHub Repository
+                </a>
+            </p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/charts.js"></script>
+    <script src="js/temp-simulator.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>

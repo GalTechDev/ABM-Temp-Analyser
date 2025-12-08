@@ -1,0 +1,402 @@
+<div class="flex flex-col items-center max-w-3xl mx-auto pt-20">
+    <h2 class="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
+        Estimation de glace carbonique</h2>
+    <div class="flex flex-col md:flex-row">
+        <div>
+            <p class="mb-6 text-gray-600 dark:text-gray-300">
+                Clique sur une cellule pour estimer la masse de glace nécessaire.
+            </p>
+
+            <div class="overflow-x-auto sm:rounded-lg">
+                <table class="min-w-full text-center text-sm border">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th class="border px-4 py-2">Temp Cible (&lt; °C) / Durée</th>
+                            <th class="border px-4 py-2">1 jour</th>
+                            <th class="border px-4 py-2">2 jours</th>
+                            <th class="border px-4 py-2">3 jours</th>
+                        </tr>
+                    </thead>
+                    <tbody id="estimation-table-body">
+                    </tbody>
+                </table>
+            </div>            
+        </div>
+
+        <div class="ml-2 mt-8 p-4 bg-gray-50 rounded-lg shadow-md w-full max-w-sm">
+            <h3 class="text-l font-bold mb-3 text-gray-800">Visualiser pour un Poids Personnalisé</h3>
+            <div class="flex flex-col items-center space-x-3">
+                <label for="customWeight" class="text-gray-700">Poids de glace (kg):</label>
+                <input type="number" id="customWeight"
+                    class="mb-2 flex-grow p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value="5" step="0.1" min="0.1">
+                <button id="showCustomCurveBtn"
+                    class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">Afficher
+                    Courbe</button>
+            </div>
+            <div id="customWeightDetails" class="mt-4 text-sm text-gray-600"></div>
+        </div>
+    </div>
+    <div id="details" class="mt-6 text-blue-800 font-medium text-lg hidden dark:text-blue-300">
+    </div>
+    <div class="w-full max-w-4xl mx-auto p-4 mt-8 items-center">
+        <canvas id="temperatureChart" class="w-full h-64 sm:h-80 md:h-96"></canvas>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+
+<script>
+
+    const T_INITIAL_CONSTANT = -77.5;
+
+    const DURATION_LINEAR_COEFFS = {
+        slope: 374.62,
+        intercept: -65.15
+    };
+
+    const SPEED_LINEAR_COEFFS = {
+        slope: 0.0019,
+        intercept: 0.2210
+    };
+
+    function predictDurationPlateau(ice_kg) {
+        if (ice_kg <= 0) return 0;
+        const { slope, intercept } = DURATION_LINEAR_COEFFS;
+        let predicted_duration = slope * ice_kg + intercept;
+
+        return Math.max(0, predicted_duration);
+    }
+
+    function predictSpeedRemontee(ice_kg) {
+        if (ice_kg <= 0) return 0.0001;
+        const { slope, intercept } = SPEED_LINEAR_COEFFS;
+        let predicted_speed = slope * ice_kg + intercept;
+
+        return Math.max(0.00001, predicted_speed);
+    }
+
+    function predictTempAtEndPlateau(ice_kg) {
+        return -77.0;
+    }
+
+    function finalTemperatureModel(t_minutes, ice_kg) {
+        if (ice_kg <= 0) {
+            return Infinity;
+        }
+
+        const T_min_pred = predictTempAtEndPlateau(ice_kg);
+        const k_pred = predictSpeedRemontee(ice_kg);
+
+        const duration_plateau_minutes = predictDurationPlateau(ice_kg);
+
+        if (t_minutes <= duration_plateau_minutes) {
+
+            return T_min_pred;
+        } else {
+
+            const time_after_plateau_minutes = t_minutes - duration_plateau_minutes;
+            const time_after_plateau_seconds = time_after_plateau_minutes * 60;
+            return T_min_pred + (k_pred * time_after_plateau_seconds);
+        }
+    }
+
+    function simulerCourbeForWeight(weight_kg, total_duration_days) {
+        const total_minutes = total_duration_days * 24 * 60;
+        const labels = [];
+        const data = [];
+
+        for (let t = 0; t <= total_minutes; t += 30) {
+            labels.push(`${Math.floor(t / 60).toString().padStart(2, '0')}h${(t % 60).toString().padStart(2, '0')}`);
+            const temp = finalTemperatureModel(t, weight_kg);
+            data.push(parseFloat(temp.toFixed(2)));
+        }
+        return { labels, data };
+    }
+
+    let chart;
+    const allCurves = [];
+
+    function initialiserToutesLesCourbes() {
+        const maxChartDurationDays = 3;
+        const maxChartDurationMinutes = maxChartDurationDays * 24 * 60;
+
+        const commonLabels = Array.from({ length: Math.floor(maxChartDurationMinutes / 30) + 1 }, (_, i) => {
+            const t = i * 30;
+            const heures = Math.floor(t / 60).toString().padStart(2, '0');
+            const minutes = (t % 60).toString().padStart(2, '0');
+            return `${heures}h${minutes}`;
+        });
+
+        allCurves.push({
+            label: `Température Initiale Glace Carbonique (${T_INITIAL_CONSTANT}°C)`,
+            data: Array(commonLabels.length).fill(T_INITIAL_CONSTANT),
+            borderColor: 'red',
+            backgroundColor: 'rgba(255, 0, 0, 0.1)',
+            borderWidth: 1,
+            borderDash: [5, 5],
+            tension: 0,
+            pointRadius: 0,
+            fill: false,
+            yAxisID: 'y'
+        });
+
+        const ctx = document.getElementById("temperatureChart").getContext("2d");
+
+        if (chart) chart.destroy();
+
+        chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: commonLabels,
+                datasets: [...allCurves]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: true }
+                },
+                scales: {
+                    y: {
+                        title: { display: true, text: 'Température (°C)' },
+                        min: -80,
+                        max: 25
+                    },
+                    x: {
+                        title: { display: true, text: 'Temps (hh:mm)' }
+                    }
+                }
+            }
+        });
+    }
+
+    function mettreEnEvidenceCourbe(target_data) {
+        chart.data.datasets.forEach(ds => {
+
+            if (ds.label && ds.label.includes("Température Initiale Glace Carbonique")) {
+                return;
+            }
+
+            ds.borderColor = 'rgba(100, 100, 100, 0.4)'; // Light gray
+            ds.backgroundColor = 'rgba(200, 200, 200, 0.05)'; // Very light fill
+            ds.borderWidth = 1;
+            ds.fill = false;
+            ds.pointRadius = 0;
+
+            if (target_data._isEstimatedCurve && ds._isEstimatedCurve &&
+                ds.weight_kg === target_data.weight_kg &&
+                ds.tempCible === target_data.tempCible &&
+                ds.jours === target_data.jours) {
+
+                ds.borderColor = 'rgb(217, 119, 6)';
+                ds.backgroundColor = 'rgba(234, 88, 12, 0.2)';
+                ds.borderWidth = 3;
+                ds.fill = true;
+                ds.pointRadius = 2;
+            }
+
+            else if (target_data._isCustomWeight && ds._isCustomWeight &&
+                ds.weight_kg === target_data.weight_kg) {
+
+                ds.borderColor = 'rgb(22, 163, 74)'; // Green for custom
+                ds.backgroundColor = 'rgba(34, 197, 94, 0.2)';
+                ds.borderWidth = 3;
+                ds.fill = true;
+                ds.pointRadius = 2;
+            }
+        });
+        chart.update();
+    }
+
+    function estimateIceMass(targetTemp, targetDays) {
+        const targetMinutes = targetDays * 24 * 60;
+
+        let lowMass = 0.01;
+        let highMass = 50.0;
+        let bestMass = null;
+
+        const iterations = 100;
+
+        for (let i = 0; i < iterations; i++) {
+            let currentMass = (lowMass + highMass) / 2;
+            if (currentMass === 0) currentMass = 0.01;
+
+            let simulatedTemp = finalTemperatureModel(targetMinutes, currentMass);
+
+            if (!Number.isFinite(simulatedTemp)) {
+                if (simulatedTemp === Infinity) {
+                    lowMass = currentMass;
+                } else {
+                    highMass = currentMass;
+                }
+                continue;
+            }
+
+            if (simulatedTemp <= targetTemp) {
+                bestMass = currentMass;
+                highMass = currentMass;
+            } else {
+                lowMass = currentMass;
+            }
+
+            if (bestMass !== null && Math.abs(simulatedTemp - targetTemp) < 0.1 && simulatedTemp <= targetTemp) {
+                break;
+            }
+        }
+
+        if (bestMass === null) {
+            let finalSimulatedTemp = finalTemperatureModel(targetMinutes, highMass);
+            if (Number.isFinite(finalSimulatedTemp) && finalSimulatedTemp <= targetTemp) {
+                bestMass = highMass;
+            }
+        }
+
+        return bestMass ? Math.round(bestMass * 1000) : null;
+    }
+
+    function generateEstimationTable() {
+        const estimationTableBody = document.getElementById("estimation-table-body");
+        estimationTableBody.innerHTML = '';
+
+        const targetTemperatures = [-60, -20];
+        const durations = [1, 2, 3];
+
+        targetTemperatures.forEach(tempCible => {
+            const row = document.createElement('tr');
+            const tempHeader = document.createElement('th');
+            tempHeader.className = "border px-4 py-2 bg-gray-50";
+            tempHeader.textContent = `${tempCible}°C`;
+            row.appendChild(tempHeader);
+
+            durations.forEach(jours => {
+                const cell = document.createElement('td');
+
+                cell.className = "border px-4 py-2 text-gray-800 cursor-pointer hover:bg-blue-100 dark:bg-gray-300";
+
+                const estimatedMass = estimateIceMass(tempCible, jours);
+
+                if (estimatedMass !== null) {
+                    cell.textContent = `${estimatedMass}g`;
+
+                    cell.dataset.estimatedMass = estimatedMass;
+                    cell.dataset.tempCible = tempCible;
+                    cell.dataset.jours = jours;
+
+                    const massInKg = estimatedMass / 1000;
+                    const maxDurationDaysForEstimation = Math.max(jours, 3);
+                    const { labels, data } = simulerCourbeForWeight(massInKg, maxDurationDaysForEstimation);
+
+                    chart.data.datasets.push({
+                        label: `Est: ${estimatedMass}g pour < ${tempCible}°C / ${jours}j`,
+                        data,
+                        _isEstimatedCurve: true,
+                        weight_kg: massInKg,
+                        tempCible: tempCible,
+                        jours: jours,
+                        borderColor: 'rgba(100, 100, 100, 0.4)',
+                        backgroundColor: 'rgba(200, 200, 200, 0.05)',
+                        borderWidth: 1,
+                        tension: 0.3,
+                        pointRadius: 0,
+                        fill: false,
+                        yAxisID: 'y'
+                    });
+                    chart.update();
+
+                    cell.addEventListener('click', () => {
+                        document.querySelectorAll("#estimation-table-body td").forEach(c => c.classList.remove("highlighted-cell"));
+
+                        cell.classList.add("highlighted-cell");
+
+                        const detailBox = document.getElementById("details");
+                        detailBox.innerHTML = `Estimation: Pour maintenir ${tempCible}°C pendant ${jours} jour(s), il faut environ ${estimatedMass}g de glace carbonique.`;
+                        detailBox.classList.remove("hidden");
+                        document.getElementById("customWeightDetails").innerHTML = "";
+                        document.getElementById("temperatureChart").classList.remove("hidden");
+
+                        mettreEnEvidenceCourbe({
+                            _isEstimatedCurve: true,
+                            weight_kg: massInKg,
+                            tempCible: tempCible,
+                            jours: jours
+                        });
+                    });
+
+                } else {
+                    cell.textContent = "N/A";
+                    cell.classList.add("text-gray-500", "italic");
+                    cell.classList.remove("cursor-pointer", "hover:bg-blue-100", "dark:bg-gray-300");
+                }
+                row.appendChild(cell);
+            });
+            estimationTableBody.appendChild(row);
+        });
+    }
+
+    const detailBox = document.getElementById("details");
+    const temperatureChart = document.getElementById("temperatureChart");
+    const customWeightInput = document.getElementById("customWeight");
+    const showCustomCurveBtn = document.getElementById("showCustomCurveBtn");
+    const customWeightDetails = document.getElementById("customWeightDetails");
+
+    showCustomCurveBtn.addEventListener("click", () => {
+        const customWeightKg = parseFloat(customWeightInput.value);
+
+        if (isNaN(customWeightKg) || customWeightKg <= 0) {
+            alert("Veuillez entrer un poids de glace carbonique valide et positif en kg.");
+            return;
+        }
+
+        document.querySelectorAll("#estimation-table-body td").forEach(c => c.classList.remove("highlighted-cell"));
+
+        let customCurveExists = false;
+        chart.data.datasets.forEach(ds => {
+            if (ds._isCustomWeight && ds.weight_kg === customWeightKg) {
+                customCurveExists = true;
+            }
+        });
+
+        if (!customCurveExists) {
+            const maxDurationDaysForCustom = 5;
+            const { labels, data } = simulerCourbeForWeight(customWeightKg, maxDurationDaysForCustom);
+
+            chart.data.datasets.push({
+                label: `Poids Perso: ${customWeightKg.toFixed(1)}kg GC`,
+                data,
+                _isCustomWeight: true,
+                weight_kg: customWeightKg,
+                borderColor: 'rgba(100, 100, 100, 0.4)',
+                backgroundColor: 'rgba(200, 200, 200, 0.05)',
+                borderWidth: 1,
+                tension: 0.3,
+                pointRadius: 0,
+                fill: false,
+                yAxisID: 'y'
+            });
+            chart.update();
+        }
+
+        const predictedDuration = predictDurationPlateau(customWeightKg);
+        const predictedSpeed = predictSpeedRemontee(customWeightKg);
+
+        customWeightDetails.innerHTML = `Poids: ${customWeightKg.toFixed(1)}kg. <br>
+                                   Durée du plateau prédite: ${Math.trunc(predictedDuration.toFixed(0) / 60)}h ${predictedDuration.toFixed(0) % 60}min. <br>
+                                   Vitesse de remontée prédite: ${predictedSpeed.toFixed(4)} °C/sec.`;
+
+        mettreEnEvidenceCourbe({ _isCustomWeight: true, weight_kg: customWeightKg });
+
+        detailBox.classList.add("hidden");
+        temperatureChart.classList.remove("hidden");
+    });
+
+
+    document.addEventListener("DOMContentLoaded", function () {
+        initialiserToutesLesCourbes();
+        generateEstimationTable();
+
+        const firstEstimationCell = document.querySelector("#estimation-table-body td");
+        if (firstEstimationCell) {
+            firstEstimationCell.click();
+        }
+    });
+</script>

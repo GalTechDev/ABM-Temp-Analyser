@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API GATE</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.1/dist/flowbite.min.css" rel="stylesheet">
+    
+    <script src="https://kit.fontawesome.com/3ba6df0ead.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.1/dist/flowbite.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/simple-datatables@9.0.3"></script>
+    <script>
+        const socket = new WebSocket("/api/data_ws")
+        socket.onmessage = (event) => {
+            document.location.reload();
+        }
+    </script>
+  </head>
+
+  <body>
+    
+    <table id="filter-table">
+    <thead>
+        <tr>
+            <th>
+                <span class="flex items-center">
+                    Mesure Name
+                    <svg class="w-4 h-4 ms-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m8 15 4 4 4-4m0-6-4-4-4 4"/>
+                    </svg>
+                </span>
+            </th>
+            <th>
+                <span class="flex items-center">
+                    Sensor ID
+                    <svg class="w-4 h-4 ms-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m8 15 4 4 4-4m0-6-4-4-4 4"/>
+                    </svg>
+                </span>
+            </th>
+            <th>
+                <span class="flex items-center">
+                    H
+                    <svg class="w-4 h-4 ms-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m8 15 4 4 4-4m0-6-4-4-4 4"/>
+                    </svg>
+                </span>
+            </th>
+            <th>
+                <span class="flex items-center">
+                    Temperature
+                    <svg class="w-4 h-4 ms-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m8 15 4 4 4-4m0-6-4-4-4 4"/>
+                    </svg>
+                </span>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for point in points %}
+        <tr>
+            <td>{{point[0]}}</td>
+            <td>{{point[1]}}</td>
+            <td>H+{{point[2]}}</td>
+            <td>{{point[3]}}°C</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    </table>
+    <script>
+        if (document.getElementById("filter-table") && typeof simpleDatatables.DataTable !== 'undefined') {
+            const dataTable = new simpleDatatables.DataTable("#filter-table", {
+                tableRender: (_data, table, type) => {
+                    if (type === "print") {
+                        return table
+                    }
+                    const tHead = table.childNodes[0]
+                    const filterHeaders = {
+                        nodeName: "TR",
+                        attributes: {
+                            class: "search-filtering-row"
+                        },
+                        childNodes: tHead.childNodes[0].childNodes.map(
+                            (_th, index) => ({nodeName: "TH",
+                                childNodes: [
+                                    {
+                                        nodeName: "INPUT",
+                                        attributes: {
+                                            class: "datatable-input",
+                                            type: "search",
+                                            "data-columns": "[" + index + "]"
+                                        }
+                                    }
+                                ]})
+                        )
+                    }
+                    tHead.childNodes.push(filterHeaders)
+                    return table
+                }
+            });
+        }
+    </script>
+  </body>
+</html>

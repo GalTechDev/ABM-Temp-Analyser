@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accueil</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.1/dist/flowbite.min.css" rel="stylesheet">
+    <link href="/css/fix_fontawesome.css" rel="stylesheet">
+    
+
+    
+    <script src="https://kit.fontawesome.com/3ba6df0ead.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.1/dist/flowbite.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+    <script src="/js/core.js"></script>
+
+  </head>
+
+  <body class="dark:bg-gray-800">
+
+    <!--navbar-->
+    {% include "part/navbar.html" %}
+    <!--end-navbar-->
+
+    <!----presentation projet card-->
+    {% include "part/tableau.html" %}
+    <!----end presentation projet card-->
+
+    <!--footer-->
+    {% include "part/footer.html" %}
+    <!--end-footer-->
+  </body>
+</html>

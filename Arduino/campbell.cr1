@@ -1,0 +1,67 @@
+'TP_Campbell
+'TSI_11-12
+
+'Variables
+Public Batt_Volt, R1,R2,R3
+Public HVoltSE
+Public HBr4w1,HBr4w2,HBr4w3
+Public R_PRT,
+Public T1,T2,T3, UU, T, U,
+Public distance
+
+
+Units Batt_Volt=Volts
+Units HBr4W1=mV
+Units HBr4W2=mV
+Units HBr4W3=mV
+Units HVoltSE =V
+Units distance = m
+
+'Definition format tables de donnees
+DataTable(Tab,True,-1)
+  
+	DataInterval(0,1,Sec,10)
+	'Minimum(1,Batt_Volt,FP2,False,False)
+	'Average(1,HBr4W,FP2,False)
+	'Average(1,HVoltSE,FP2,False)
+	'Average(1,distance,FP2,False)
+	'Average(1,TT,FP2,False)
+ '    Average(1,UU,FP2,False)
+	'StdDev (1,TT,FP2,False)
+	'StdDev (1,UU,FP2,False)
+	'Sample (1,distance,FP2)
+	Sample(1,T1,FP2)
+	Sample(1,T2,FP2)	
+	Sample(1,T3,FP2)	
+EndTable
+
+'Programme principal
+BeginProg
+	Scan(1,Sec,1,0)
+		'Default Datalogger Battery Voltage measurement Batt_Volt:
+		Battery(Batt_Volt)
+		'Generic Half Bridge, 4 Wire measurements HBr4W:
+		'BrHalf4W(HBr4W1,1,mV250,mV250,1,1,2,250,True,True,0,_50Hz,1.0,0.0)
+		BrHalf4W(HBr4W1,1,mV250,mV250,1,1,2,250,True,True,0,_50Hz,1.0,0.0)
+    BrHalf3W(HBr4w2,1,mV250,15,Vx2,1,250,True ,0,_50Hz,1.0,0)
+    BrHalf3W(HBr4w3,1,mV250,13,Vx3,1,250,True ,0,_50Hz,1.0,0)
+		'BrHalf4W (HBr4W1,1,mV250,mV250,1,1,3,250,True ,True ,0,250,1.0,0)
+		'BrHalf4W (HBr4W2,1,mV250,mV250,3,1,3,250,True ,True ,0,250,1.0,0)
+		'BrHalf4W (HBr4W3,1,mV250,mV250,5,1,3,250,True ,True ,0,250,1.0,0)
+		VoltSe (HVoltSE,1,mV2500,16,False,0,548,1.0,0)
+		SDI12Recorder(distance,1,0,"M!",1.0,0)
+		
+		'Call Data Tables and Store Data
+		R1 = HBr4W1 * 100
+		T1 = ((R1 / 100) - 1)/0.00390802
+		R2 = HBr4W2 * 100
+		T2 = ((R2 / 100) - 1)/0.00390802
+		R3 = HBr4W3 * 100
+		T3 = ((R3 / 100) - 1)/0.00390802
+
+		'UU= (HVoltSE-400)/16
+		
+    CallTable(Tab) 'Ecrit les donnees dans la table
+		
+	NextScan
+EndProg
